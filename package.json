@@ -1,0 +1,21 @@
+{
+  "name": "scholargraph-ai",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Local-first research paper analyzer with citation intelligence and graph visualization.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @scholargraph/api\" \"npm run worker:dev -w @scholargraph/api\" \"npm run dev -w @scholargraph/web\"",
+    "dev:api": "npm run dev -w @scholargraph/api",
+    "dev:worker": "npm run worker:dev -w @scholargraph/api",
+    "dev:web": "npm run dev -w @scholargraph/web",
+    "build": "npm run build -w @scholargraph/api && npm run build -w @scholargraph/web",
+    "lint": "npm run lint -w @scholargraph/api && npm run lint -w @scholargraph/web"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
