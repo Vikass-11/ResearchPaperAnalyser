@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function PaperList({ refreshTrigger }) {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchPapers = async () => {
     try {
@@ -18,9 +20,14 @@ export default function PaperList({ refreshTrigger }) {
 
   useEffect(() => {
     fetchPapers();
+    // Setup polling for processing status
+    const interval = setInterval(() => {
+      fetchPapers();
+    }, 5000);
+    return () => clearInterval(interval);
   }, [refreshTrigger]);
 
-  if (loading) return <p className="text-slate-500">Loading papers...</p>;
+  if (loading && papers.length === 0) return <p className="text-slate-500">Loading papers...</p>;
   if (papers.length === 0) return <p className="text-slate-500 italic">No papers uploaded yet.</p>;
 
   return (
@@ -35,14 +42,14 @@ export default function PaperList({ refreshTrigger }) {
         </thead>
         <tbody className="bg-white divide-y divide-slate-200">
           {papers.map((paper) => (
-            <tr key={paper.id} className="hover:bg-slate-50 cursor-pointer">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+            <tr key={paper.id} onClick={() => navigate(`/paper/${paper.id}`)} className="hover:bg-slate-50 cursor-pointer transition-colors">
+              <td className="px-6 py-4 text-sm font-medium text-slate-900">
                 {paper.title}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                   ${paper.processing_status === 'COMPLETED' ? 'bg-green-100 text-green-800' : 
-                    paper.processing_status === 'ERROR' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    paper.processing_status === 'ERROR' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800 animate-pulse'}`}>
                   {paper.processing_status}
                 </span>
               </td>

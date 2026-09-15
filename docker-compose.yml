@@ -26,7 +26,7 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
 
   grobid:
-    image: lfoppiano/grobid:0.8.0
+    image: lfoppiano/grobid:0.7.3
     container_name: scholargraph-grobid
     ports:
       - "8070:8070"
