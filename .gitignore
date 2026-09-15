@@ -9,3 +9,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.db
+backend/scholargraph.db
+venv/
+.pytest_cache/
+
+# Environment variables
+.env
+
+# Testing
+test_pdfs/
+
