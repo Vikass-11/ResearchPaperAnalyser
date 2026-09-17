@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { UploadCloud, FileText, Loader2, AlertCircle } from "lucide-react";
 
 export default function UploadPaper({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
@@ -26,8 +27,7 @@ export default function UploadPaper({ onUploadSuccess }) {
 
       await response.json();
       setFile(null);
-      // Reset file input
-      document.getElementById('file-upload').value = '';
+      if (fileInputRef.current) fileInputRef.current.value = '';
       if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
       setError(err.message);
@@ -36,36 +36,78 @@ export default function UploadPaper({ onUploadSuccess }) {
     }
   };
 
+  const fileInputRef = useRef(null);
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-      <h2 className="text-xl font-semibold mb-4 text-slate-800">Upload Research Paper</h2>
-      <form onSubmit={handleUpload} className="flex flex-col gap-4">
-        <div>
-          <label htmlFor="file-upload" className="block text-sm font-medium text-slate-700 mb-2">
-            Select PDF file
-          </label>
+    <div className="glass-card p-6 md:p-8 rounded-2xl">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-brand-100 p-2 rounded-xl text-brand-600">
+          <UploadCloud className="w-5 h-5" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800 tracking-tight">Upload Paper</h2>
+      </div>
+      
+      <form onSubmit={handleUpload} className="flex flex-col gap-5">
+        <div 
+          className={`relative border-2 border-dashed rounded-xl p-8 transition-all text-center
+            ${file ? 'border-brand-500 bg-brand-50/50' : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50/50'}
+          `}
+        >
           <input
             id="file-upload"
+            ref={fileInputRef}
             type="file"
             accept="application/pdf"
             onChange={(e) => setFile(e.target.files[0])}
-            className="block w-full text-sm text-slate-500
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-md file:border-0
-              file:text-sm file:font-semibold
-              file:bg-blue-50 file:text-blue-700
-              hover:file:bg-blue-100 cursor-pointer border border-slate-300 rounded-md p-2"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
+          
+          <div className="flex flex-col items-center justify-center space-y-3 pointer-events-none">
+            {file ? (
+              <>
+                <FileText className="w-10 h-10 text-brand-500" />
+                <div>
+                  <p className="text-sm font-semibold text-brand-700">{file.name}</p>
+                  <p className="text-xs text-brand-500/80 mt-1">Ready to upload ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 bg-white shadow-sm rounded-full flex items-center justify-center mb-1">
+                  <UploadCloud className="w-6 h-6 text-slate-400" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-700">
+                    <span className="text-brand-600">Click to upload</span> or drag and drop
+                  </p>
+                  <p className="text-xs text-slate-500">PDF documents only</p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && (
+          <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg text-sm border border-red-100">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
         
         <button
           type="submit"
           disabled={!file || loading}
-          className="bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="relative overflow-hidden w-full bg-brand-600 text-white py-3 px-4 rounded-xl font-semibold 
+            hover:bg-brand-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed 
+            transition-all duration-300 shadow-sm hover:shadow active:scale-[0.98]"
         >
-          {loading ? "Uploading..." : "Upload & Analyze"}
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" /> Analyzing...
+            </span>
+          ) : (
+            "Upload & Analyze"
+          )}
         </button>
       </form>
     </div>
