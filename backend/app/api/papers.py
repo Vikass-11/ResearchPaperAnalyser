@@ -6,7 +6,7 @@ import os
 import asyncio
 
 from app.models.database import get_db
-from app.models.schema import Paper, Section
+from app.models.schema import Paper, Section, Reference, Citation
 from app.schemas.paper import PaperResponse, PaperDetailResponse, PaperUploadResponse
 from app.services.grobid_service import process_pdf_with_grobid
 from app.services.pdf_service import extract_text_from_pdf
@@ -48,6 +48,34 @@ async def process_paper_background(paper_id: int, file_path: str, db: Session):
                 )
                 db.add(db_sec)
                 sections_text += f"\n\n### {sec['section_name']} ###\n{sec['content']}"
+                
+            # Save References
+            ref_id_map = {} # Maps XML ID (e.g., 'b0') to DB ID
+            for ref_data in grobid_data.get("references", []):
+                db_ref = Reference(
+                    paper_id=paper.id,
+                    reference_number=ref_data["id"],
+                    title=ref_data["title"],
+                    authors=ref_data["authors"],
+                    year=ref_data["year"],
+                    journal_conference=ref_data["journal_conference"],
+                    raw_text=ref_data["raw_text"]
+                )
+                db.add(db_ref)
+                db.flush() # To get the db_ref.id
+                ref_id_map[ref_data["id"]] = db_ref.id
+                
+            # Save Citations
+            for cit_data in grobid_data.get("citations", []):
+                target_ref_db_id = ref_id_map.get(cit_data["reference_id"])
+                if target_ref_db_id:
+                    db_cit = Citation(
+                        paper_id=paper.id,
+                        reference_id=target_ref_db_id,
+                        context=cit_data["context"],
+                        section_name=cit_data["section_name"]
+                    )
+                    db.add(db_cit)
                 
             db.commit()
         except Exception as e:
@@ -131,7 +159,43 @@ def get_papers(db: Session = Depends(get_db)):
 @router.get("/{paper_id}", response_model=PaperDetailResponse)
 def get_paper(paper_id: int, db: Session = Depends(get_db)):
     # Need to load sections for detailed view
-    paper = db.query(Paper).options(joinedload(Paper.sections)).filter(Paper.id == paper_id).first()
+    paper = db.query(Paper).options(
+        joinedload(Paper.sections),
+        joinedload(Paper.references).joinedload(Reference.citations)
+    ).filter(Paper.id == paper_id).first()
     if not paper:
         raise HTTPException(status_code=404, detail="Paper not found")
     return paper
+
+@router.get("/{paper_id}/graph")
+def get_paper_graph(paper_id: int, db: Session = Depends(get_db)):
+    paper = db.query(Paper).options(joinedload(Paper.references)).filter(Paper.id == paper_id).first()
+    if not paper:
+        raise HTTPException(status_code=404, detail="Paper not found")
+        
+    nodes = []
+    links = []
+    
+    # Add the main paper as the root node
+    nodes.append({
+        "id": f"paper_{paper.id}",
+        "name": paper.title or "Uploaded Paper",
+        "group": "main",
+        "val": 20
+    })
+    
+    # Add references as nodes and create links
+    for ref in paper.references:
+        ref_id = f"ref_{ref.id}"
+        nodes.append({
+            "id": ref_id,
+            "name": ref.title or ref.raw_text[:50] + "...",
+            "group": "reference",
+            "val": 5
+        })
+        links.append({
+            "source": f"paper_{paper.id}",
+            "target": ref_id
+        })
+        
+    return {"nodes": nodes, "links": links}
