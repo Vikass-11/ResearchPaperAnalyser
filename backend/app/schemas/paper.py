@@ -10,6 +10,28 @@ class SectionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class CitationResponse(BaseModel):
+    id: int
+    context: str
+    section_name: Optional[str] = None
+    reference_id: int
+
+    class Config:
+        from_attributes = True
+
+class ReferenceResponse(BaseModel):
+    id: int
+    reference_number: Optional[str] = None
+    title: Optional[str] = None
+    authors: Optional[List[Any]] = None
+    year: Optional[int] = None
+    journal_conference: Optional[str] = None
+    raw_text: str
+    citations: List[CitationResponse] = []
+    
+    class Config:
+        from_attributes = True
+
 class PaperResponse(BaseModel):
     id: int
     title: Optional[str] = None
@@ -34,6 +56,7 @@ class PaperDetailResponse(PaperResponse):
     future_work: Optional[List[Any]] = None
     error_message: Optional[str] = None
     sections: List[SectionResponse] = []
+    references: List[ReferenceResponse] = []
 
 class PaperUploadResponse(BaseModel):
     id: int
