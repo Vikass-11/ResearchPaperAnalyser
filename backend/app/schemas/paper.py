@@ -27,6 +27,7 @@ class ReferenceResponse(BaseModel):
     year: Optional[int] = None
     journal_conference: Optional[str] = None
     raw_text: str
+    ai_summary: Optional[str] = None
     citations: List[CitationResponse] = []
     
     class Config:
@@ -54,6 +55,7 @@ class PaperDetailResponse(PaperResponse):
     contributions: Optional[List[Any]] = None
     limitations: Optional[List[Any]] = None
     future_work: Optional[List[Any]] = None
+    web_impact_analysis: Optional[str] = None
     error_message: Optional[str] = None
     sections: List[SectionResponse] = []
     references: List[ReferenceResponse] = []
