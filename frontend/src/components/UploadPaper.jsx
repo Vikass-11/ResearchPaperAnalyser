@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { UploadCloud, FileText, Loader2, AlertCircle } from "lucide-react";
+import { papersApi } from "../api";
 
 export default function UploadPaper({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
@@ -12,25 +13,14 @@ export default function UploadPaper({ onUploadSuccess }) {
 
     setLoading(true);
     setError(null);
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/papers/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to upload paper");
-      }
-
-      await response.json();
+      await papersApi.uploadPaper(file);
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       if (onUploadSuccess) onUploadSuccess();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to upload paper');
     } finally {
       setLoading(false);
     }
