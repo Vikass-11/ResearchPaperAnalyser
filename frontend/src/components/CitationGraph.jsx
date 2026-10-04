@@ -1,12 +1,22 @@
 import { useEffect, useState, useRef } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import { Loader2, Network } from 'lucide-react';
+import { client } from '../api';
 
-export default function CitationGraph({ paperId }) {
-  const [graphData, setGraphData] = useState({ nodes: [], links: [] });
-  const [loading, setLoading] = useState(true);
+export default function CitationGraph({ 
+  graphData: externalGraphData, 
+  paperId,
+  onNodeClick, 
+  nodeColor = (node) => node.group === 'main' ? '#0284c7' : '#8b5cf6',
+  nodeLabel = "name"
+}) {
+  const [internalData, setInternalData] = useState({ nodes: [], links: [] });
+  const [loading, setLoading] = useState(!externalGraphData);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const containerRef = useRef(null);
+  const fgRef = useRef();
+
+  const graphData = externalGraphData || internalData;
 
   useEffect(() => {
     // Update dimensions on window resize or mount
@@ -24,14 +34,14 @@ export default function CitationGraph({ paperId }) {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
+  // Backward compatibility fetch
   useEffect(() => {
+    if (externalGraphData || !paperId) return;
+
     const fetchGraph = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/v1/papers/${paperId}/graph`);
-        if (res.ok) {
-          const data = await res.json();
-          setGraphData(data);
-        }
+        const data = await client.get(`/papers/${paperId}/graph`);
+        if (data) setInternalData(data);
       } catch (err) {
         console.error("Failed to fetch graph:", err);
       } finally {
@@ -39,20 +49,29 @@ export default function CitationGraph({ paperId }) {
       }
     };
     fetchGraph();
-  }, [paperId]);
+  }, [paperId, externalGraphData]);
+
+  // Ensure graph fits on load
+  useEffect(() => {
+    if (fgRef.current && graphData?.nodes?.length > 0) {
+      setTimeout(() => {
+        fgRef.current.zoomToFit(400, 50);
+      }, 500);
+    }
+  }, [graphData]);
 
   if (loading) {
     return (
-      <div className="p-16 text-center text-slate-500 flex flex-col items-center justify-center">
+      <div className="p-16 text-center text-slate-500 flex flex-col items-center justify-center h-[600px] bg-slate-50/50 rounded-xl">
         <Loader2 className="w-8 h-8 animate-spin text-brand-500 mb-3" />
         Loading graph visualization...
       </div>
     );
   }
 
-  if (graphData.nodes.length <= 1) {
+  if (!graphData || graphData.nodes.length <= 1) {
     return (
-      <div className="p-16 text-center text-slate-500 border-dashed border-2 rounded-xl flex flex-col items-center justify-center border-slate-200">
+      <div className="p-16 text-center text-slate-500 border-dashed border-2 rounded-xl flex flex-col items-center justify-center border-slate-200 h-[600px]">
         <Network className="w-8 h-8 text-slate-300 mb-2" />
         No citation network found for this paper.
       </div>
@@ -60,13 +79,15 @@ export default function CitationGraph({ paperId }) {
   }
 
   return (
-    <div ref={containerRef} className="rounded-xl overflow-hidden w-full bg-slate-50/50">
+    <div ref={containerRef} className="rounded-xl overflow-hidden w-full h-[600px] bg-slate-50/50">
       <ForceGraph2D
+        ref={fgRef}
         width={dimensions.width}
         height={dimensions.height}
         graphData={graphData}
-        nodeLabel="name"
-        nodeColor={node => node.group === 'main' ? '#0284c7' : '#8b5cf6'} // brand-600 and violet-500
+        nodeLabel={nodeLabel}
+        nodeColor={nodeColor}
+        onNodeClick={onNodeClick}
         nodeRelSize={6}
         linkDirectionalArrowLength={3.5}
         linkDirectionalArrowRelPos={1}
