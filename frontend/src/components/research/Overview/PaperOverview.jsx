@@ -35,10 +35,10 @@ export function PaperOverview() {
 
   // Display fields that exist on summary
   const statCards = [
-    { label: "Related Papers", value: summary?.related_papers_count ?? "-", icon: Network, color: "text-blue-500", bg: "bg-blue-50" },
-    { label: "Analyzed Papers", value: summary?.analyzed_papers_count ?? "-", icon: BarChart, color: "text-brand-500", bg: "bg-brand-50" },
-    { label: "Research Gaps", value: summary?.research_gaps_count ?? "-", icon: Search, color: "text-amber-500", bg: "bg-amber-50" },
-    { label: "Recent Works", value: summary?.recent_research_count ?? "-", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-50" },
+    { label: "Related Papers", value: summary?.literature?.related_count ?? "-", icon: Network, color: "text-blue-500", bg: "bg-blue-50" },
+    { label: "Analyzed Papers", value: summary?.literature?.analyzed_count ?? "-", icon: BarChart, color: "text-brand-500", bg: "bg-brand-50" },
+    { label: "Research Gaps", value: summary?.literature?.research_gap_count ?? "-", icon: Search, color: "text-amber-500", bg: "bg-amber-50" },
+    { label: "Recent Works", value: summary?.literature?.recent_research_count ?? "-", icon: FileText, color: "text-emerald-500", bg: "bg-emerald-50" },
   ];
 
   return (

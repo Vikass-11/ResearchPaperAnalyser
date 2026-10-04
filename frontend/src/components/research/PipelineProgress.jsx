@@ -4,14 +4,14 @@ export function PipelineProgress({ statusData }) {
   if (!statusData) return null;
 
   const steps = [
-    { key: 'extracted_metadata', label: 'Paper Processed' },
-    { key: 'generated_profile', label: 'Research Profile' },
-    { key: 'discovered_related', label: 'Related Papers' },
-    { key: 'ranked_papers', label: 'Relevance Ranking' },
-    { key: 'analyzed_literature', label: 'Literature Analysis' },
-    { key: 'synthesized_survey', label: 'Literature Survey' },
-    { key: 'detected_gaps', label: 'Research Gaps' },
-    { key: 'discovered_recent', label: 'Recent Research' },
+    { key: 'pdf_extraction', label: 'Paper Processed' },
+    { key: 'research_profile', label: 'Research Profile' },
+    { key: 'related_papers', label: 'Related Papers' },
+    { key: 'ranking', label: 'Relevance Ranking' },
+    { key: 'literature_analysis', label: 'Literature Analysis' },
+    { key: 'literature_survey', label: 'Literature Survey' },
+    { key: 'research_gaps', label: 'Research Gaps' },
+    { key: 'recent_research', label: 'Recent Research' },
   ];
 
   return (
