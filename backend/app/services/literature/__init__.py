@@ -1,0 +1,2 @@
+from .research_profile_service import generate_research_profile
+from .related_paper_service import discover_related_papers
