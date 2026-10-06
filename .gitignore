@@ -26,4 +26,8 @@ venv/
 
 # Testing
 test_pdfs/
+backend/migrate_*.py
+backend/tests/
+backend/test_results/
+backend/test_*.py
 
