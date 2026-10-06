@@ -32,7 +32,7 @@ export function Dashboard() {
 
   if (data.loading) {
     return (
-      <PageContainer title="Dashboard" subtitle="Welcome to ScholarGraph AI">
+      <PageContainer title="Dashboard" subtitle="Welcome to ResearchPaperLens">
         <LoadingState message="Loading research library..." />
       </PageContainer>
     );
@@ -40,7 +40,7 @@ export function Dashboard() {
 
   if (data.error) {
     return (
-      <PageContainer title="Dashboard" subtitle="Welcome to ScholarGraph AI">
+      <PageContainer title="Dashboard" subtitle="Welcome to ResearchPaperLens">
         <ErrorState title="Unable to load research library" message={data.error} onRetry={() => window.location.reload()} />
       </PageContainer>
     );
