@@ -27,7 +27,7 @@ Do NOT copy or describe the TARGET RESEARCH PROFILE in these fields. The Target 
 
 Analyze ONLY information supported by the supplied RELATED PAPER metadata/abstract.
 Do not invent details.
-If a field cannot be determined from the provided RELATED PAPER information, return: "Not available from retrieved metadata."
+If a field cannot be determined from the provided RELATED PAPER information, return an empty list [] for array fields, or "Not available from retrieved metadata." for string fields.
 Return structured JSON matching the supplied schema.
 
 --- Target Research Profile ---

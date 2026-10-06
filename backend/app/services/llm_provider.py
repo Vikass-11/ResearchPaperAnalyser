@@ -33,7 +33,7 @@ async def analyze_paper_sections(sections_text: str) -> PaperAnalysisOutput:
     You are an expert academic AI assistant. Your task is to analyze a research paper 
     and extract key information into a structured format. 
     Be factual and ground all your claims in the provided text.
-    If a field is not present in the paper, provide an empty list or 'Not mentioned'.
+    If a field is not present in the paper, provide an empty list [] for array fields or 'Not mentioned' for string fields.
     """
     
     # We truncate if it's absurdly long to fit context windows for the summary step (Groq 8192 token limit)
