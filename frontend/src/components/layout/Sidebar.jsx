@@ -26,10 +26,8 @@ export function Sidebar() {
       <div className="flex flex-col w-64 border-r border-slate-200 bg-white/50 backdrop-blur-xl">
         <div className="flex items-center h-16 px-6 border-b border-slate-200/60">
           <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <div className="bg-brand-600 text-white p-1.5 rounded-lg shadow-md shadow-brand-500/20">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <span className="text-lg font-bold text-slate-800 tracking-tight">ScholarGraph<span className="text-brand-600">AI</span></span>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain rounded-lg shadow-sm" />
+            <span className="text-lg font-bold text-slate-800 tracking-tight">ResearchPaper<span className="text-brand-600">Lens</span></span>
           </Link>
         </div>
         
