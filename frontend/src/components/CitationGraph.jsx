@@ -51,9 +51,15 @@ export default function CitationGraph({
     fetchGraph();
   }, [paperId, externalGraphData]);
 
-  // Ensure graph fits on load
+  // Ensure graph fits on load and apply proper forces
   useEffect(() => {
     if (fgRef.current && graphData?.nodes?.length > 0) {
+      // Increase repulsion to prevent clustering
+      fgRef.current.d3Force('charge').strength(-400);
+      
+      // Increase link distance to spread out connections
+      fgRef.current.d3Force('link').distance(100);
+
       setTimeout(() => {
         fgRef.current.zoomToFit(400, 50);
       }, 500);
