@@ -1,63 +1,145 @@
-# ScholarGraph AI
+# ResearchPaperLens (ScholarGraph AI)
 
-ScholarGraph AI is a local-first research paper analyzer. It uploads a PDF, extracts structure and references, stores chunks for retrieval, answers paper questions, and shows a citation relationship graph.
+AI-Powered Research Paper Analysis, Citation Intelligence & Literature Discovery System.
 
-## Day 1 Status
+ResearchPaperLens allows researchers to upload academic PDFs, automatically extract structure, parse citations, visualize citation networks, detect research gaps, synthesize community web reception, and discover recent related work using LLMs and academic search APIs.
 
-This repository starts with a deployable foundation:
+---
 
-- Next.js web app
-- NestJS API
-- BullMQ worker
-- PostgreSQL schema designed for pgvector
-- Redis-backed background processing
-- PDF text extraction with heuristic paper analysis
-- Optional Ollama integration hook
-- GROBID service in Docker Compose for the next extraction upgrade
+## 🏗 Architecture & Tech Stack
 
-## Run Locally
+- **Frontend:** React 19, Vite, Tailwind CSS, Lucide Icons, ForceGraph 2D (`react-force-graph-2d`).
+- **Backend:** FastAPI (Python), SQLite (`scholargraph.db`), SQLAlchemy, PyMuPDF, Pydantic.
+- **LLM Engine:** Groq (e.g. `openai/gpt-oss-120b`) for fast cloud inference or Ollama (`llama3.2`) for local offline inference via OpenAI-compatible async clients.
+- **Academic APIs:** OpenAlex & Semantic Scholar integration for discovery, citation resolution, and relevance scoring.
+- **Auxiliary Services (Optional):** GROBID container for enhanced PDF structure and TEI-XML extraction.
 
-1. Copy environment values:
+---
 
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- **Python:** 3.10+ (with virtual environment)
+- **Node.js:** 18+ and npm
+- **Docker:** (Optional, only needed if running GROBID or local Ollama)
+
+---
+
+### 2. Backend Setup
+
+1. Open a terminal in the `backend` directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create and activate a Python virtual environment:
+   ```bash
+   # Windows (PowerShell)
+   python -m venv ..\venv
+   ..\venv\Scripts\Activate.ps1
+
+   # Linux/macOS
+   python3 -m venv ../venv
+   source ../venv/bin/activate
+   ```
+
+3. Install backend dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Configure environment variables:
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+
+   Configure your preferred LLM provider in `backend/.env`:
+   - **Groq (Cloud - Recommended):**
+     ```env
+     LLM_PROVIDER=groq
+     LLM_API_KEY=gsk_your_groq_api_key
+     LLM_BASE_URL=https://api.groq.com/openai/v1
+     LLM_MODEL=openai/gpt-oss-120b
+     LLM_TIMEOUT_SECONDS=600
+     LITERATURE_ANALYSIS_CONCURRENCY=1
+     ```
+   - **Ollama (Local):**
+     ```env
+     LLM_PROVIDER=ollama
+     LLM_BASE_URL=http://localhost:11434/v1
+     LLM_MODEL=llama3.2
+     LLM_API_KEY=sk-placeholder
+     ```
+
+5. Start the FastAPI backend server:
+   ```bash
+   uvicorn app.main:app --reload --port 8000
+   ```
+   - **API Docs (Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+   - **Health Check:** [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
+
+---
+
+### 3. Frontend Setup
+
+1. Open a new terminal in the `frontend` directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Verify `frontend/.env`:
+   ```env
+   VITE_API_BASE_URL=http://localhost:8000/api/v1
+   ```
+
+4. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+   - **Web App:** [http://localhost:5173](http://localhost:5173)
+
+---
+
+### 4. Optional Support Services (GROBID & Ollama)
+
+To run GROBID for high-fidelity PDF extraction or local Ollama:
 ```bash
-cp .env.example .env
-```
+# Run GROBID
+docker compose up -d grobid
 
-2. Start infrastructure:
-
-```bash
-docker compose up -d postgres redis grobid
-```
-
-3. Install dependencies:
-
-```bash
-npm install
-```
-
-4. Start the app, API, and worker:
-
-```bash
-npm run dev
-```
-
-Frontend: http://localhost:3000  
-API: http://localhost:4000
-
-## Optional Local AI
-
-Start Ollama separately or with Docker Compose:
-
-```bash
+# Run Ollama (optional)
 docker compose --profile ai up -d ollama
-ollama pull llama3.1:8b
-ollama pull nomic-embed-text
+ollama pull llama3.2
 ```
 
-Then set:
+---
 
-```env
-AI_PROVIDER=ollama
+## 🧪 Running Tests
+
+Run backend unit and integration tests from the `backend` directory:
+```bash
+cd backend
+python -m pytest tests/test_api_integration.py tests/test_production_hardening.py
 ```
 
-The app still works without Ollama using deterministic extraction and heuristic analysis.
+Run frontend build check:
+```bash
+cd frontend
+npm run build
+```
+
+---
+
+## 🌐 Production Deployment
+
+- **Frontend (Vercel):**
+  - Set Environment Variable: `VITE_API_BASE_URL=https://your-backend-domain.com/api/v1`
+  - Ensure your backend `CORS_ORIGINS` includes your Vercel URL (e.g. `https://researchpaperlens.vercel.app`).
+- **Backend:**
+  - Can be hosted on platforms such as Render, Railway, Fly.io, or an AWS EC2 instance running Uvicorn.
