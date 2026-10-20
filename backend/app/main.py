@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import papers, literature
 from app.models.database import init_db
-from app.config import CORS_ORIGINS_LIST, LLM_BASE_URL
+from app.config import CORS_ORIGINS_LIST, LLM_BASE_URL, LLM_API_KEY
 
 # Initialize database
 init_db()
@@ -55,12 +55,17 @@ async def health_check():
     llm_status = "unavailable"
     try:
         if LLM_BASE_URL:
-            # lightweight check, base_url is typically http://localhost:11434/v1, so we check root
-            root_url = LLM_BASE_URL.replace("/v1", "/")
-            async with httpx.AsyncClient(timeout=2.0) as client:
-                res = await client.get(root_url)
-                if res.status_code == 200:
-                    llm_status = "available"
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                if LLM_API_KEY and LLM_API_KEY != "sk-placeholder":
+                    headers = {"Authorization": f"Bearer {LLM_API_KEY}"}
+                    res = await client.get(f"{LLM_BASE_URL}/models", headers=headers)
+                    if res.status_code == 200:
+                        llm_status = "available"
+                if llm_status != "available":
+                    root_url = LLM_BASE_URL.replace("/v1", "/")
+                    res = await client.get(root_url)
+                    if res.status_code == 200:
+                        llm_status = "available"
     except Exception:
         pass
     
