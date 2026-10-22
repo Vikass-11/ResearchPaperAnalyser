@@ -34,6 +34,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS_LIST,
+    allow_origin_regex=r"^https?:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,6 +47,17 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
+
+@app.get("/", tags=["System"])
+@app.head("/", tags=["System"])
+async def root():
+    return {
+        "status": "ok",
+        "service": "Research Paper Analyzer API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/v1/health"
+    }
 
 app.include_router(papers.router, prefix="/api/v1/papers", tags=["Papers"])
 app.include_router(literature.router, prefix="/api/v1/papers", tags=["Literature"])
