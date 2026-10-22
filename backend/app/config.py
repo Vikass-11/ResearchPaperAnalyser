@@ -28,4 +28,20 @@ MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 # CORS
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,https://researchpaperlens.vercel.app")
-CORS_ORIGINS_LIST = [origin.strip() for origin in CORS_ORIGINS.split(",") if origin.strip()]
+
+DEFAULT_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://researchpaperlens.vercel.app",
+]
+
+_raw_origins = [
+    origin.strip().strip('"').strip("'").rstrip("/")
+    for origin in CORS_ORIGINS.split(",")
+    if origin.strip().strip('"').strip("'").rstrip("/")
+]
+
+# Merge while preserving uniqueness and order
+CORS_ORIGINS_LIST = list(dict.fromkeys(_raw_origins + DEFAULT_ORIGINS))
+
