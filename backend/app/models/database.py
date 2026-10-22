@@ -6,10 +6,16 @@ from .schema import Base
 # Determine database URL
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./scholargraph.db")
 
+# Normalize legacy postgres:// scheme to postgresql:// for SQLAlchemy
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 engine = create_engine(
     DATABASE_URL, 
+    pool_pre_ping=True,
     connect_args={"check_same_thread": False, "timeout": 15} if DATABASE_URL.startswith("sqlite") else {}
 )
+
 
 if DATABASE_URL.startswith("sqlite"):
     @event.listens_for(engine, "connect")
